@@ -1,6 +1,6 @@
 <?php
 
-namespace Shucream0117\SlimBoost\Utils;
+namespace Shucream0117\SlimBoost\Controllers;
 
 use Shucream0117\SlimBoost\Constants\HttpStatusCode;
 use Shucream0117\SlimBoost\Entities\Responses\Json\EmptyResponse;
@@ -115,7 +115,7 @@ trait JsonResponseTrait
         }
         $response = new Response($statusCode);
         $response = $response->withJson(
-            get_object_vars($data),
+            get_object_vars($data) ?: new \stdClass(),
             $statusCode,
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR
         );

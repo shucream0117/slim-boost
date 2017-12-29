@@ -2,8 +2,6 @@
 
 namespace Shucream0117\SlimBoost\Controllers;
 
-use Shucream0117\SlimBoost\Utils\JsonResponseTrait;
-
 /**
  * JSONを返すAPIのコントローラ基底
  *
