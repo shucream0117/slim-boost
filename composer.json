@@ -17,12 +17,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Shucream0117\\SlimBoostTests\\": "src/"
+      "Shucream0117\\SlimBoost\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Tests\\": "tests/"
+      "Shucream0117\\SlimBoostTests\\": "tests/"
     }
   }
 }
