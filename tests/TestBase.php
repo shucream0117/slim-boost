@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Shucream0117\SlimBoostTests;
 
 use PHPUnit\Framework\TestCase;
 

@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Shucream0117\\SlimBoost\\": "src/"
+      "Shucream0117\\SlimBoostTests\\": "src/"
     }
   },
   "autoload-dev": {
