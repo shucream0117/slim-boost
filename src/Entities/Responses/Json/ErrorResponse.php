@@ -16,7 +16,7 @@ namespace Shucream0117\SlimBoost\Entities\Responses\Json;
 class ErrorResponse extends JsonResponseBodyBase
 {
     /** @var array */
-    protected $error;
+    public $error;
 
     /**
      * 通常のエラーメッセージ以外に入れたいものがあれば、$additionalDataに連想配列で指定出来る
