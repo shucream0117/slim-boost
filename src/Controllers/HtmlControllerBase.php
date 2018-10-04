@@ -3,7 +3,6 @@
 namespace Shucream0117\SlimBoost\Controllers;
 
 use Shucream0117\SlimBoost\Constants\HttpStatusCode;
-use Slim\Container;
 use Slim\Http\Response;
 
 /**
@@ -14,8 +13,6 @@ use Slim\Http\Response;
  */
 abstract class HtmlControllerBase extends ControllerBase
 {
-    abstract protected function getContainer(): Container;
-
     /**
      * example: "twig", "smarty"
      * @return string
@@ -25,7 +22,7 @@ abstract class HtmlControllerBase extends ControllerBase
     private function render(Response $response, string $templateFileName, array $args): Response
     {
         $templateFileName = self::completeFileName($templateFileName);
-        return $this->getContainer()['renderer']->render($response, $templateFileName, $args);
+        return $this->app['renderer']->render($response, $templateFileName, $args);
     }
 
     private static function completeFileName(string $fileName): string
