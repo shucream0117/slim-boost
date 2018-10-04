@@ -124,6 +124,7 @@ abstract class HtmlControllerBase extends ControllerBase
      */
     private function getResponseObject(int $statusCode): Response
     {
-        return new Response($statusCode);
+        $res = new Response($statusCode);
+        return $res->withHeader('Content-Type', 'text/html');
     }
 }
