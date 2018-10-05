@@ -3,6 +3,7 @@
 namespace Shucream0117\SlimBoost\Controllers;
 
 use Shucream0117\SlimBoost\Constants\HttpStatusCode;
+use Slim\Http\Headers;
 use Slim\Http\Response;
 
 /**
@@ -18,6 +19,20 @@ abstract class HtmlControllerBase extends ControllerBase
      * @return string
      */
     abstract protected static function getTemplateExtension(): string;
+
+    /**
+     * @return array
+     */
+    abstract protected function customResponseHeaders(): array;
+
+    /**
+     * this can be overwritten by customResponseHeaders()
+     * @return array
+     */
+    final protected function defaultResponseHeaders(): array
+    {
+        return ['Content-Type' => 'text/html; charset=utf-8'];
+    }
 
     private function render(Response $response, string $templateFileName, array $args): Response
     {
@@ -38,11 +53,12 @@ abstract class HtmlControllerBase extends ControllerBase
      * 200 OK
      * @param string $templateFileName
      * @param array $args
+     * @param array $additionalHeader
      * @return Response
      */
-    protected function ok(string $templateFileName, array $args = []): Response
+    protected function ok(string $templateFileName, array $args = [], array $additionalHeader = []): Response
     {
-        $res = $this->getResponseObject(HttpStatusCode::OK);
+        $res = $this->getResponseObject(HttpStatusCode::OK, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
     }
 
@@ -52,9 +68,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param array $args
      * @return Response
      */
-    protected function badRequest(string $templateFileName, array $args = []): Response
+    protected function badRequest(string $templateFileName, array $args = [], array $additionalHeader = []): Response
     {
-        $res = $this->getResponseObject(HttpStatusCode::BAD_REQUEST);
+        $res = $this->getResponseObject(HttpStatusCode::BAD_REQUEST, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
     }
 
@@ -62,11 +78,12 @@ abstract class HtmlControllerBase extends ControllerBase
      * 401 Unauthorized
      * @param string $templateFileName
      * @param array $args
+     * @param array $additionalHeader
      * @return Response
      */
-    protected function unauthorized(string $templateFileName, array $args = []): Response
+    protected function unauthorized(string $templateFileName, array $args = [], array $additionalHeader = []): Response
     {
-        $res = $this->getResponseObject(HttpStatusCode::UNAUTHORIZED);
+        $res = $this->getResponseObject(HttpStatusCode::UNAUTHORIZED, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
     }
 
@@ -74,11 +91,12 @@ abstract class HtmlControllerBase extends ControllerBase
      * 403 Forbidden
      * @param string $templateFileName
      * @param array $args
+     * @param array $additionalHeader
      * @return Response
      */
-    protected function forbidden(string $templateFileName, array $args = []): Response
+    protected function forbidden(string $templateFileName, array $args = [], array $additionalHeader = []): Response
     {
-        $res = $this->getResponseObject(HttpStatusCode::FORBIDDEN);
+        $res = $this->getResponseObject(HttpStatusCode::FORBIDDEN, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
     }
 
@@ -86,11 +104,12 @@ abstract class HtmlControllerBase extends ControllerBase
      * 404 Not Found
      * @param string $templateFileName
      * @param array $args
+     * @param array $additionalHeader
      * @return Response
      */
-    protected function notFound(string $templateFileName, array $args = []): Response
+    protected function notFound(string $templateFileName, array $args = [], array $additionalHeader = []): Response
     {
-        $res = $this->getResponseObject(HttpStatusCode::NOT_FOUND);
+        $res = $this->getResponseObject(HttpStatusCode::NOT_FOUND, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
     }
 
@@ -98,11 +117,12 @@ abstract class HtmlControllerBase extends ControllerBase
      * 500 Internal Server Error
      * @param string $templateFileName
      * @param array $args
+     * @param array $additionalHeader
      * @return Response
      */
-    protected function internalServerError(string $templateFileName, array $args = []): Response
+    protected function internalServerError(string $templateFileName, array $args = [], array $additionalHeader = []): Response
     {
-        $res = $this->getResponseObject(HttpStatusCode::INTERNAL_SERVER_ERROR);
+        $res = $this->getResponseObject(HttpStatusCode::INTERNAL_SERVER_ERROR, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
     }
 
@@ -110,11 +130,12 @@ abstract class HtmlControllerBase extends ControllerBase
      * 503 Service Unavailable
      * @param string $templateFileName
      * @param array $args
+     * @param array $additionalHeader
      * @return Response
      */
-    protected function serviceUnavailable(string $templateFileName, array $args = []): Response
+    protected function serviceUnavailable(string $templateFileName, array $args = [], array $additionalHeader = []): Response
     {
-        $res = $this->getResponseObject(HttpStatusCode::SERVICE_UNAVAILABLE);
+        $res = $this->getResponseObject(HttpStatusCode::SERVICE_UNAVAILABLE, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
     }
 
@@ -122,9 +143,13 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param int $statusCode
      * @return Response
      */
-    private function getResponseObject(int $statusCode): Response
+    private function getResponseObject(int $statusCode, array $additionalHeader = []): Response
     {
-        $res = new Response($statusCode);
-        return $res->withHeader('Content-Type', 'text/html');
+        $headers = new Headers(array_merge(
+            $this->defaultResponseHeaders(),
+            $this->customResponseHeaders(),
+            $additionalHeader
+        ));
+        return new Response($statusCode, $headers);
     }
 }
