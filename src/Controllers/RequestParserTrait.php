@@ -49,4 +49,24 @@ trait RequestParserTrait
     {
         return $this->request->getQueryParam($key, $default);
     }
+
+    /**
+     * Cookieの値を取得する
+     * @param string $key
+     * @param null $default
+     * @return mixed
+     */
+    protected function getCookie(string $key, $default = null)
+    {
+        return $this->request->getCookieParam($key, $default);
+    }
+
+    /**
+     * Cookieをarrayで取得する
+     * @return array
+     */
+    protected function getCookies(): array
+    {
+        return $this->request->getCookieParams();
+    }
 }
