@@ -50,6 +50,21 @@ abstract class HtmlControllerBase extends ControllerBase
     }
 
     /**
+     * @param string $to
+     * @param int $statusCode
+     * @param array $additionalHeader
+     * @return Response
+     */
+    protected function redirect(
+        string $to,
+        int $statusCode = HttpStatusCode::MOVED_PERMANENTLY,
+        array $additionalHeader = []
+    ): Response {
+        $res = $this->getResponseObject($statusCode, $additionalHeader);
+        return $res->withRedirect($to, $statusCode);
+    }
+
+    /**
      * 200 OK
      * @param string $templateFileName
      * @param array $args
