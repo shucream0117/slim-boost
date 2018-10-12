@@ -2,6 +2,9 @@
 
 namespace Shucream0117\SlimBoost\Controllers;
 
+use Dflydev\FigCookies\SetCookies;
+use Dflydev\FigCookies\SetCookie;
+use Psr\Http\Message\ResponseInterface;
 use Shucream0117\SlimBoost\Constants\HttpStatusCode;
 use Slim\Http\Headers;
 use Slim\Http\Response;
@@ -34,8 +37,9 @@ abstract class HtmlControllerBase extends ControllerBase
         return ['Content-Type' => 'text/html; charset=utf-8'];
     }
 
-    private function render(Response $response, string $templateFileName, array $args): Response
+    private function render(ResponseInterface $response, string $templateFileName, array $args): ResponseInterface
     {
+        $response = $this->appendCookieToResponse($response);
         $templateFileName = self::completeFileName($templateFileName);
         return $this->app['renderer']->render($response, $templateFileName, $args);
     }
@@ -49,18 +53,61 @@ abstract class HtmlControllerBase extends ControllerBase
         return "{$fileName}.{$ext}";
     }
 
+
+    /** @var SetCookies */
+    protected $responseCookies;
+
+    protected function setCookie(
+        string $key,
+        string $value,
+        ?\DateTime $expiresIn = null,
+        bool $httpOnly = true,
+        bool $secure = true,
+        string $path = '/',
+        ?string $domain = null
+    ): void {
+        $setCookie = SetCookie::create($key)
+            ->withValue($value)
+            ->withSecure($secure)
+            ->withHttpOnly($httpOnly)
+            ->withPath($path);
+        if ($domain) {
+            $setCookie = $setCookie->withDomain($domain);
+        }
+        if ($expiresIn) {
+            $setCookie = $setCookie->withExpires($expiresIn);
+        } else {
+            $setCookie = $setCookie->rememberForever();
+        }
+
+        if ($this->responseCookies) {
+            $this->responseCookies = $this->responseCookies->with($setCookie);
+        } else {
+            $this->responseCookies = new SetCookies([$setCookie]);
+        }
+    }
+
+    protected function appendCookieToResponse(Response $response): ResponseInterface
+    {
+        if ($this->responseCookies) {
+            return $this->responseCookies->renderIntoSetCookieHeader($response);
+        }
+        return $response;
+    }
+
     /**
      * @param string $to
      * @param int $statusCode
      * @param array $additionalHeader
-     * @return Response
+     * @return ResponseInterface
      */
     protected function redirect(
         string $to,
         int $statusCode = HttpStatusCode::MOVED_PERMANENTLY,
         array $additionalHeader = []
-    ): Response {
+    ): ResponseInterface {
         $res = $this->getResponseObject($statusCode, $additionalHeader);
+        $res = $this->appendCookieToResponse($res);
         return $res->withRedirect($to, $statusCode);
     }
 
@@ -69,9 +116,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param string $templateFileName
      * @param array $args
      * @param array $additionalHeader
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function ok(string $templateFileName, array $args = [], array $additionalHeader = []): Response
+    protected function ok(string $templateFileName, array $args = [], array $additionalHeader = []): ResponseInterface
     {
         $res = $this->getResponseObject(HttpStatusCode::OK, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
@@ -81,9 +128,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * 400 Bad Request
      * @param string $templateFileName
      * @param array $args
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function badRequest(string $templateFileName, array $args = [], array $additionalHeader = []): Response
+    protected function badRequest(string $templateFileName, array $args = [], array $additionalHeader = []): ResponseInterface
     {
         $res = $this->getResponseObject(HttpStatusCode::BAD_REQUEST, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
@@ -94,9 +141,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param string $templateFileName
      * @param array $args
      * @param array $additionalHeader
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function unauthorized(string $templateFileName, array $args = [], array $additionalHeader = []): Response
+    protected function unauthorized(string $templateFileName, array $args = [], array $additionalHeader = []): ResponseInterface
     {
         $res = $this->getResponseObject(HttpStatusCode::UNAUTHORIZED, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
@@ -107,9 +154,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param string $templateFileName
      * @param array $args
      * @param array $additionalHeader
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function forbidden(string $templateFileName, array $args = [], array $additionalHeader = []): Response
+    protected function forbidden(string $templateFileName, array $args = [], array $additionalHeader = []): ResponseInterface
     {
         $res = $this->getResponseObject(HttpStatusCode::FORBIDDEN, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
@@ -120,9 +167,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param string $templateFileName
      * @param array $args
      * @param array $additionalHeader
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function notFound(string $templateFileName, array $args = [], array $additionalHeader = []): Response
+    protected function notFound(string $templateFileName, array $args = [], array $additionalHeader = []): ResponseInterface
     {
         $res = $this->getResponseObject(HttpStatusCode::NOT_FOUND, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
@@ -133,9 +180,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param string $templateFileName
      * @param array $args
      * @param array $additionalHeader
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function internalServerError(string $templateFileName, array $args = [], array $additionalHeader = []): Response
+    protected function internalServerError(string $templateFileName, array $args = [], array $additionalHeader = []): ResponseInterface
     {
         $res = $this->getResponseObject(HttpStatusCode::INTERNAL_SERVER_ERROR, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
@@ -146,9 +193,9 @@ abstract class HtmlControllerBase extends ControllerBase
      * @param string $templateFileName
      * @param array $args
      * @param array $additionalHeader
-     * @return Response
+     * @return ResponseInterface
      */
-    protected function serviceUnavailable(string $templateFileName, array $args = [], array $additionalHeader = []): Response
+    protected function serviceUnavailable(string $templateFileName, array $args = [], array $additionalHeader = []): ResponseInterface
     {
         $res = $this->getResponseObject(HttpStatusCode::SERVICE_UNAVAILABLE, $additionalHeader);
         return $this->render($res, $templateFileName, $args);
@@ -156,9 +203,10 @@ abstract class HtmlControllerBase extends ControllerBase
 
     /**
      * @param int $statusCode
-     * @return Response
+     * @param array $additionalHeader
+     * @return ResponseInterface
      */
-    private function getResponseObject(int $statusCode, array $additionalHeader = []): Response
+    private function getResponseObject(int $statusCode, array $additionalHeader = []): ResponseInterface
     {
         $headers = new Headers(array_merge(
             $this->defaultResponseHeaders(),
