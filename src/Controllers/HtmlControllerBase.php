@@ -4,6 +4,7 @@ namespace Shucream0117\SlimBoost\Controllers;
 
 use Dflydev\FigCookies\SetCookies;
 use Dflydev\FigCookies\SetCookie;
+use Dflydev\FigCookies\FigResponseCookies;
 use Psr\Http\Message\ResponseInterface;
 use Shucream0117\SlimBoost\Constants\HttpStatusCode;
 use Slim\Http\Headers;
@@ -37,9 +38,10 @@ abstract class HtmlControllerBase extends ControllerBase
         return ['Content-Type' => 'text/html; charset=utf-8'];
     }
 
-    private function render(ResponseInterface $response, string $templateFileName, array $args): ResponseInterface
+    protected function render(ResponseInterface $response, string $templateFileName, array $args): ResponseInterface
     {
         $response = $this->appendCookieToResponse($response);
+        $response = $this->expireCookiesInResponse($response);
         $templateFileName = self::completeFileName($templateFileName);
         return $this->app['renderer']->render($response, $templateFileName, $args);
     }
@@ -53,10 +55,44 @@ abstract class HtmlControllerBase extends ControllerBase
         return "{$fileName}.{$ext}";
     }
 
+    /**
+     * @var array
+     */
+    private $expireTargetCookieKeys = [];
+
+    /**
+     * @param string $key
+     */
+    protected function expireCookie(string $key): void
+    {
+        $this->expireTargetCookieKeys[] = $key;
+    }
+
+    /**
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     */
+    private function expireCookiesInResponse(ResponseInterface $response): ResponseInterface
+    {
+        foreach ($this->expireTargetCookieKeys as $key) {
+            $response = FigResponseCookies::expire($response, $key);
+        }
+        return $response;
+    }
+
 
     /** @var SetCookies */
-    protected $responseCookies;
+    private $responseCookies;
 
+    /**
+     * @param string $key
+     * @param string $value
+     * @param \DateTime|null $expiresIn
+     * @param bool $httpOnly
+     * @param bool $secure
+     * @param string $path
+     * @param null|string $domain
+     */
     protected function setCookie(
         string $key,
         string $value,
@@ -87,7 +123,7 @@ abstract class HtmlControllerBase extends ControllerBase
         }
     }
 
-    protected function appendCookieToResponse(Response $response): ResponseInterface
+    private function appendCookieToResponse(ResponseInterface $response): ResponseInterface
     {
         if ($this->responseCookies) {
             return $this->responseCookies->renderIntoSetCookieHeader($response);
@@ -108,6 +144,7 @@ abstract class HtmlControllerBase extends ControllerBase
     ): ResponseInterface {
         $res = $this->getResponseObject($statusCode, $additionalHeader);
         $res = $this->appendCookieToResponse($res);
+        $res = $this->expireCookiesInResponse($res);
         return $res->withRedirect($to, $statusCode);
     }
 
