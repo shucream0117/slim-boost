@@ -10,6 +10,48 @@ use Slim\Http\Response;
 
 trait JsonResponseTrait
 {
+    protected function isCorsEnabled(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getAllowedOrigin(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getAcceptedHeaders(): array
+    {
+        return [];
+    }
+
+    /**
+     * @return string[]
+     */
+    protected static $DEFAULT_ACCEPTED_HEADERS = ['Content-Type', 'Accept', 'Origin', 'Accept-Encoding'];
+
+    /**
+     * レスポンスオブジェクトにCORS用のヘッダーを付加する
+     * Access-Control-Allow-Methods については middleware.php で行っているので注意
+     * @param Response $response
+     * @param array $allowedOrigin
+     * @return Response
+     */
+    private function addHeadersForCORS(Response $response): Response
+    {
+        $allowedOrigin = $this->getAllowedOrigin();
+        $allowedOriginStr = empty($allowedOrigin) ? '*' : implode(', ', $allowedOrigin);
+        $acceptedHeaders = array_merge(static::$DEFAULT_ACCEPTED_HEADERS, $this->getAcceptedHeaders());
+        return $response->withHeader('Access-Control-Allow-Origin', $allowedOriginStr)
+            ->withHeader('Access-Control-Allow-Headers', $acceptedHeaders);
+    }
+
     /**
      * 200 OK
      * @param JsonResponseBodyBase $data
@@ -108,8 +150,7 @@ trait JsonResponseTrait
     private function getResponseObject(
         int $statusCode,
         ?JsonResponseBodyBase $data = null
-    ): Response
-    {
+    ): Response {
         if (is_null($data)) {
             $data = new EmptyResponse();
         }
@@ -119,6 +160,10 @@ trait JsonResponseTrait
             $statusCode,
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR
         );
+
+        if (true || $this->isCorsEnabled()) {
+            $response = $this->addHeadersForCORS($response);
+        }
         return $response;
     }
 }
