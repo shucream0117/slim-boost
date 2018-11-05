@@ -2,6 +2,8 @@
 
 namespace Shucream0117\SlimBoost\Controllers;
 
+use Slim\Http\UploadedFile;
+
 /**
  * Request オブジェクトをコントローラから扱いやすくする氏
  */
@@ -68,5 +70,25 @@ trait RequestParserTrait
     protected function getCookies(): array
     {
         return $this->request->getCookieParams();
+    }
+
+    /**
+     * ファイルを取得する
+     * @param string $key
+     * @return null|UploadedFile
+     */
+    protected function getFile(string $key): ?UploadedFile
+    {
+        $files = $this->request->getUploadedFiles();
+        return $files[$key] ?? null;
+    }
+
+    /**
+     * ファイルをarrayで取得する
+     * @return UploadedFile[]
+     */
+    protected function getFiles(): array
+    {
+        return $this->request->getUploadedFiles();
     }
 }
