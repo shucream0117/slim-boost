@@ -91,4 +91,24 @@ trait RequestParserTrait
     {
         return $this->request->getUploadedFiles();
     }
+
+    /**
+     * $_SERVERの値を取得する
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     */
+    protected function getServerParam(string $key, $default = null)
+    {
+        return $this->request->getServerParam($key, $default);
+    }
+
+    /**
+     * @return array
+     */
+    protected function getServerParams(): array
+    {
+        return $this->request->getServerParams();
+    }
+
 }
