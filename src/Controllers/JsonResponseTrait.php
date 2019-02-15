@@ -161,7 +161,7 @@ trait JsonResponseTrait
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR
         );
 
-        if (true || $this->isCorsEnabled()) {
+        if ($this->isCorsEnabled()) {
             $response = $this->addHeadersForCORS($response);
         }
         return $response;
