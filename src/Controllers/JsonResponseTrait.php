@@ -147,7 +147,7 @@ trait JsonResponseTrait
      * @param null|JsonResponseBodyBase $data
      * @return Response
      */
-    private function getResponseObject(
+    protected function getResponseObject(
         int $statusCode,
         ?JsonResponseBodyBase $data = null
     ): Response {
