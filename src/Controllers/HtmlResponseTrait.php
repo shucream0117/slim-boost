@@ -122,7 +122,7 @@ trait HtmlResponseTrait
         }
     }
 
-    private function appendCookieToResponse(ResponseInterface $response): ResponseInterface
+    protected function appendCookieToResponse(ResponseInterface $response): ResponseInterface
     {
         if ($this->responseCookies) {
             return $this->responseCookies->renderIntoSetCookieHeader($response);
@@ -244,7 +244,7 @@ trait HtmlResponseTrait
      * @param array $additionalHeader
      * @return ResponseInterface
      */
-    private function getResponseObject(int $statusCode, array $additionalHeader = []): ResponseInterface
+    protected function getResponseObject(int $statusCode, array $additionalHeader = []): ResponseInterface
     {
         $headers = new Headers(array_merge(
             $this->defaultResponseHeaders(),

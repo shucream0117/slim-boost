@@ -40,10 +40,9 @@ trait JsonResponseTrait
      * レスポンスオブジェクトにCORS用のヘッダーを付加する
      * Access-Control-Allow-Methods については middleware.php で行っているので注意
      * @param Response $response
-     * @param array $allowedOrigin
      * @return Response
      */
-    private function addHeadersForCORS(Response $response): Response
+    protected function addHeadersForCORS(Response $response): Response
     {
         $allowedOrigin = $this->getAllowedOrigin();
         $allowedOriginStr = empty($allowedOrigin) ? '*' : implode(', ', $allowedOrigin);
