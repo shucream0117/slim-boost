@@ -14,18 +14,32 @@ use stdClass;
  * プロパティ名はそのままjsonのキー名になる
  *
  */
-abstract class JsonResponseBodyBase
+abstract class JsonResponseBodyBase implements \JsonSerializable
 {
     /**
-     * json的にオブジェクトを期待するとき、PHPの空配列をjsonで空オブジェクトにするための関数
-     * @param array $array
+     * 空配列のときにもJSONのオブジェクト形式で返却したいフィールド名を列挙する
+     * @var  string[]
+     */
+    protected static $objectTypeFields = [];
+
+    /**
      * @return array|stdClass
      */
-    protected function convertToEmptyObjectIfAssocArrayIsEmpty(array $array)
+    public function jsonSerialize()
     {
-        if (empty($array)) {
+        if (!$vars = get_object_vars($this)) {
             return new stdClass();
         }
-        return $array;
+
+        if (!static::$objectTypeFields) {
+            return $vars;
+        }
+
+        foreach (static::$objectTypeFields as $field) {
+            if (($vars[$field] ?? null) === []) {
+                $vars[$field] = new \stdClass();
+            }
+        }
+        return $vars;
     }
 }

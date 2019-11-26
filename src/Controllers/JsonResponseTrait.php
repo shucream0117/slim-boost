@@ -155,7 +155,7 @@ trait JsonResponseTrait
         }
         $response = new Response($statusCode);
         $response = $response->withJson(
-            get_object_vars($data) ?: new \stdClass(),
+            $data ?: new \stdClass(),
             $statusCode,
             JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR
         );
