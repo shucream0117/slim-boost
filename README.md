@@ -1,7 +1,7 @@
 # SlimBoost
 
 - Slim3
-- PHP ≧ 7.1.x
+- PHP ≧ 7.2.x
 
 おためし版です
 
