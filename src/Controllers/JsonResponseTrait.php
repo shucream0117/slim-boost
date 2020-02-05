@@ -72,6 +72,17 @@ trait JsonResponseTrait
     }
 
     /**
+     * 30x Redirect
+     * @param string $to
+     * @param int $statusCode
+     * @return Response
+     */
+    protected function redirect(string $to, int $statusCode = HttpStatusCode::MOVED_PERMANENTLY): Response
+    {
+        return $this->getResponseObject($statusCode, null, ['Location' => $to]);
+    }
+
+    /**
      * 400 Bad Request
      * @param ErrorResponse $data
      * @return Response
@@ -141,15 +152,19 @@ trait JsonResponseTrait
         return $this->getResponseObject(HttpStatusCode::SERVICE_UNAVAILABLE, $data);
     }
 
+
     /**
      * @param int $statusCode
      * @param null|JsonResponseBodyBase $data
+     * @param array $additionalHeaders
      * @return Response
      */
     protected function getResponseObject(
         int $statusCode,
-        ?JsonResponseBodyBase $data = null
-    ): Response {
+        ?JsonResponseBodyBase $data = null,
+        array $additionalHeaders = []
+    ): Response
+    {
         if (is_null($data)) {
             $data = new EmptyResponse();
         }
@@ -162,6 +177,9 @@ trait JsonResponseTrait
 
         if ($this->isCorsEnabled()) {
             $response = $this->addHeadersForCORS($response);
+        }
+        foreach ($additionalHeaders as $k => $v) {
+            $response = $response->withHeader($k, $v);
         }
         return $response;
     }
