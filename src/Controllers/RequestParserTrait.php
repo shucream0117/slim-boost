@@ -111,4 +111,31 @@ trait RequestParserTrait
         return $this->request->getServerParams();
     }
 
+    /**
+     * @param string $key
+     * @param null $default
+     * @return mixed
+     */
+    public function getSessionParam(string $key, $default = null)
+    {
+        $array = $this->getSessionParams();
+        return array_key_exists($key, $array) ? $array[$key] : $default;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSessionParams(): array
+    {
+        return $_SESSION;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setSessionParam(string $key, $value): void
+    {
+        $_SESSION[$key] = $value;
+    }
 }
